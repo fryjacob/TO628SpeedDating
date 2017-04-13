@@ -69,3 +69,31 @@ sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the da
 
 sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
 
+interestTable <- unique(data.frame(sdclean$iid))
+interestTable$iid <- interestTable$sdclean.iid
+interestTable$sdclean.iid <- NULL
+
+for (x in interestTable$iid) {
+  interestTable$go_out[interestTable$iid == x] <- sdclean$go_out[x == sdclean$iid]
+  interestTable$age[interestTable$iid == x] <- sdclean$age[x == sdclean$iid]
+  interestTable$field_cd[interestTable$iid == x] <- sdclean$field_cd[x == sdclean$iid]
+  interestTable$date[interestTable$iid == x] <- sdclean$date[x == sdclean$iid]
+  interestTable$sports[interestTable$iid == x] <- sdclean$sports[x == sdclean$iid]
+  interestTable$tvsports[interestTable$iid == x] <- sdclean$tvsports[x == sdclean$iid]
+  interestTable$exercise[interestTable$iid == x] <- sdclean$exercise[x == sdclean$iid]
+  interestTable$dining[interestTable$iid == x] <- sdclean$dining[x == sdclean$iid]
+  interestTable$museums[interestTable$iid == x] <- sdclean$museums[x == sdclean$iid]
+  interestTable$art[interestTable$iid == x] <- sdclean$art[x == sdclean$iid]
+  interestTable$hiking[interestTable$iid == x] <- sdclean$hiking[x == sdclean$iid]
+  interestTable$gaming[interestTable$iid == x] <- sdclean$gaming[x == sdclean$iid]
+  interestTable$clubbing[interestTable$iid == x] <- sdclean$clubbing[x == sdclean$iid]
+  interestTable$reading[interestTable$iid == x] <- sdclean$reading[x == sdclean$iid]
+  interestTable$tv[interestTable$iid == x] <- sdclean$tv[x == sdclean$iid]
+  interestTable$theater[interestTable$iid == x] <- sdclean$theater[x == sdclean$iid]
+  interestTable$movies[interestTable$iid == x] <- sdclean$movies[x == sdclean$iid]
+  interestTable$concerts[interestTable$iid == x] <- sdclean$concerts[x == sdclean$iid]
+  interestTable$music[interestTable$iid == x] <- sdclean$music[x == sdclean$iid]
+  interestTable$shopping[interestTable$iid == x] <- sdclean$shopping[x == sdclean$iid]
+  interestTable$yoga[interestTable$iid == x] <- sdclean$yoga[x == sdclean$iid]
+}
+
