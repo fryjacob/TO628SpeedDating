@@ -24,10 +24,15 @@ speed$date <- as.factor(speed$date)
 levels(speed$date) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
 speed$go_out <- as.factor(speed$go_out)
 levels(speed$go_out) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$group <- ifelse(speed$career_c == 2, 1, ifelse(speed$career_c == 7, 2, 3))
+speed$group <- as.factor(speed$group)
+levels(speed$group) <- c("Academic/Research", "Business", "Other")
+
 speed$career_c <-as.factor(speed$career_c)
 levels(speed$career_c) <- c("Lawyer","Academic/Research","Psychologist","DocMed", "Engineer", "Entertainment", "Banking/Consulting", "RealEstate","IntlAffairs","Undecided","SocialWork","SpeechPath","Politics", "ProSports", "Other", "Journalism", "Architecture")
 speed$race_o <-as.factor(speed$race_o) 
 speed$samerace <- as.factor(speed$samerace)
+
 
 sd2 <- speed[ , c(
     "iid", 
@@ -75,12 +80,14 @@ sd2 <- speed[ , c(
     "fun2_1",
     "amb2_1",
     "shar2_1",
+    "group",
     "wave")]
 
 waveNum <- which(colnames(sd2)=="wave")
 sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
 
-sd2 <- sd2[, -45]
+sd2 <- sd2[, -45] #Remove wave numbers
+
 sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the data is organized by participant
 
 sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
@@ -88,12 +95,20 @@ sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
 
 ```
 
-## Including Plots
+## Logit Model
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## KNN Model
+
+```{r}
+
+
+```
+
+
