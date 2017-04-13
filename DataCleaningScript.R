@@ -57,12 +57,13 @@ sd2 <- speed[ , c(
     "intel2_1",
     "fun2_1",
     "amb2_1",
-    "shar2_1",
-    "wave")]
+    "shar2_1
+    "wave")]",
 
 waveNum <- which(colnames(sd2)=="wave")
 sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
 
+sd2 <- sd2[, -45]
 sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the data is organized by participant
 
 sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
