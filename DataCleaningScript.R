@@ -57,8 +57,8 @@ sd2 <- speed[ , c(
     "intel2_1",
     "fun2_1",
     "amb2_1",
-    "shar2_1
-    "wave")]",
+    "shar2_1",
+    "wave")]
 
 waveNum <- which(colnames(sd2)=="wave")
 sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
