@@ -8,10 +8,14 @@ speed$date <- as.factor(speed$date)
 levels(speed$date) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
 speed$go_out <- as.factor(speed$go_out)
 levels(speed$go_out) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$group <- ifelse(speed$career_c == 2, 1, ifelse(speed$career_c == 7, 2, 3))
+speed$group <- as.factor(speed$group)
+levels(speed$group) <- c("Academic/Research", "Business", "Other")
 speed$career_c <-as.factor(speed$career_c)
 levels(speed$career_c) <- c("Lawyer","Academic/Research","Psychologist","DocMed", "Engineer", "Entertainment", "Banking/Consulting", "RealEstate","IntlAffairs","Undecided","SocialWork","SpeechPath","Politics", "ProSports", "Other", "Journalism", "Architecture")
 speed$race_o <-as.factor(speed$race_o) 
 speed$samerace <- as.factor(speed$samerace)
+
 
 sd2 <- speed[ , c(
     "iid", 
