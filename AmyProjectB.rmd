@@ -1,0 +1,74 @@
+---
+title: "AmyProjectB"
+author: "Amy Maloche"
+date: "April 15, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+
+## Random Forests ----
+# random forest with default settings
+library(randomForest)
+library(caret)
+suppressWarnings(library(gmodels))
+
+
+set.seed(300)
+sdForest <- sdReduced
+startColumn <- which(colnames(sdForest) == "pGoOut")
+stopColumn <- (which(colnames(sdForest) == "pYoga"))
+sdForest <- sdForest[, -(startColumn:stopColumn)]
+startColumn <- which(colnames(sdForest) == "date")
+stopColumn <- which(colnames(sdForest) == "yoga")
+sdForest <- sdForest[, -(startColumn:stopColumn)]
+sdForest <- sdForest[, -1] #remove iid
+sdForest <- sdForest[, -2] #remove pid
+
+rfDummies <- as.data.frame(model.matrix(~ . -1, sdForest))
+
+rfMatchFactor <- rfDummies
+rfMatchFactor$match1 <- as.factor(rfMatchFactor$match1)
+
+randomizedData <- rfMatchFactor[sample(nrow(rfMatchFactor)),]
+
+trainRows <- round(nrow(randomizedData) * .8)
+trainData <- randomizedData[1:trainRows, ]
+testData <- randomizedData[(trainRows+1):nrow(randomizedData), ]
+
+rfModel <- randomForest(match1 ~ ., data = trainData)
+
+rfPred <- predict(rfModel, testData, type="response")
+
+CrossTable(rfPred, testData$match1)
+
+# ctrl <- trainControl(method = "repeatedcv",
+#                      number = 10, repeats = 10)
+# 
+# # auto-tune a random forest
+# grid_rf <- expand.grid(.mtry = c(2, 4, 8, 16))
+# 
+# set.seed(300)
+# m_rf <- train(match1 ~ ., data = rfMatchFactor, method = "rf",
+#               metric = "Kappa", trControl = ctrl,
+#               tuneGrid = grid_rf)
+# m_rf
+# 
+# # auto-tune a boosted C5.0 decision tree
+# grid_c50 <- expand.grid(.model = "tree",
+#                         .trials = c(10, 20, 30, 40),
+#                         .winnow = "FALSE")
+# 
+# set.seed(300)
+# m_c50 <- train(match1 ~ ., data = rfMatchFactor, method = "C5.0",
+#                 metric = "Kappa", trControl = ctrl,
+#                tuneGrid = grid_c50)
+# m_c50
+
+
+```
