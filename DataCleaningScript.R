@@ -18,6 +18,7 @@ sd2 <- speed[ , c(
     "gender", 
     "pid", 
     "match", 
+    "dec",
     "int_corr", 
     "samerace", 
     "age_o", 
