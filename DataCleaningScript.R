@@ -14,53 +14,59 @@ speed$race_o <-as.factor(speed$race_o)
 speed$samerace <- as.factor(speed$samerace)
 
 sd2 <- speed[ , c(
-    "iid", 
-    "gender", 
-    "pid", 
-    "match", 
-    "dec",
-    "int_corr", 
-    "samerace", 
-    "age_o", 
-    "race_o",
-    "dec_o",
-    "age", 
-    "field_cd", 
-    "race", 
-    "imprace", 
-    "imprelig", 
-    "date", 
-    "go_out",
-    "sports",
-    "tvsports",
-    "exercise",
-    "dining",
-    "museums",
-    "art",
-    "hiking",
-    "gaming",
-    "clubbing",
-    "reading",
-    "tv",
-    "theater",
-    "movies",
-    "concerts",
-    "music",
-    "shopping",
-    "yoga",
-    "attr1_1",
-    "sinc1_1",
-    "intel1_1",
-    "fun1_1",
-    "amb1_1",
-    "shar1_1",
-    "attr2_1",
-    "sinc2_1",
-    "intel2_1",
-    "fun2_1",
-    "amb2_1",
-    "shar2_1",
-    "wave")]
+  "iid", 
+  "gender", 
+  "pid", 
+  "match", 
+  "dec",
+  "int_corr", 
+  "samerace", 
+  "age_o", 
+  "race_o",
+  "dec_o",
+  "age", 
+  "field_cd", 
+  "race", 
+  "imprace", 
+  "imprelig", 
+  "date", 
+  "go_out",
+  "sports",
+  "tvsports",
+  "exercise",
+  "dining",
+  "museums",
+  "art",
+  "hiking",
+  "gaming",
+  "clubbing",
+  "reading",
+  "tv",
+  "theater",
+  "movies",
+  "concerts",
+  "music",
+  "shopping",
+  "yoga",
+  "attr1_1",
+  "sinc1_1",
+  "intel1_1",
+  "fun1_1",
+  "amb1_1",
+  "shar1_1",
+  "attr2_1",
+  "sinc2_1",
+  "intel2_1",
+  "fun2_1",
+  "amb2_1",
+  "shar2_1",
+  "wave",
+  "attr",
+  "sinc",
+  "intel",
+  "fun",
+  "amb",
+  "shar")]
 
 waveNum <- which(colnames(sd2)=="wave")
 sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
@@ -99,10 +105,11 @@ for (x in interestTable$iid) {
 }
 
 #Add column to correct attributions that don't add up to 100
-sdclean$attr1_1 <- round(sdclean$attr1_1/sdclean$total*100, digits = 2)
-sdclean$sinc1_1 <- round(sdclean$sinc1_1/sdclean$total*100, digits = 2)
-sdclean$intel1_1 <- round(sdclean$intel1_1/sdclean$total*100, digits = 2)
-sdclean$fun1_1 <- round(sdclean$fun1_1/sdclean$total*100, digits = 2)
-sdclean$amb1_1 <- round(sdclean$amb1_1/sdclean$total*100, digits = 2)
-sdclean$shar1_1 <- round(sdclean$shar1_1/sdclean$total*100, digits = 2)
-sdclean$total <- round(rowSums(sdclean[,c("attr1_1", "sinc1_1", "intel1_1", "fun1_1", "amb1_1", "shar1_1")]),0)
+sdclean$total1 <- rowSums(sdclean[,c("attr1_1", "sinc1_1", "intel1_1", "fun1_1", "amb1_1", "shar1_1")])
+sdclean$attr1_1 <- round(sdclean$attr1_1/sdclean$total1*100, digits = 2)
+sdclean$sinc1_1 <- round(sdclean$sinc1_1/sdclean$total1*100, digits = 2)
+sdclean$intel1_1 <- round(sdclean$intel1_1/sdclean$total1*100, digits = 2)
+sdclean$fun1_1 <- round(sdclean$fun1_1/sdclean$total1*100, digits = 2)
+sdclean$amb1_1 <- round(sdclean$amb1_1/sdclean$total1*100, digits = 2)
+sdclean$shar1_1 <- round(sdclean$shar1_1/sdclean$total1*100, digits = 2)
+sdclean$total1 <- round(rowSums(sdclean[,c("attr1_1", "sinc1_1", "intel1_1", "fun1_1", "amb1_1", "shar1_1")]),0)
