@@ -328,19 +328,19 @@ corfshar <- cor(test2ff$Decision, test2ff$Interest)
 ```{r}
 # Correlation barplot for average
 library(ggplot2)
-corravg <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(coratr, corsin, corint, corfun, coramb, corint))
+corravg <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(coratr, corsin, corint, corfun, coramb, corshar))
 ggplot(corravg, aes(attributes, correlation)) + geom_bar(stat="identity") + xlab("") + ylab("Correlation") + labs(title="Impact of attributes on decision (average)")
 ```
 
 ```{r}
 # Correlation barplot for males
-corrm <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(cormatr, cormsin, cormint, cormfun, cormamb, cormint))
+corrm <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(cormatr, cormsin, cormint, cormfun, cormamb, cormshar))
 ggplot(corrm, aes(attributes, correlation)) + geom_bar(stat="identity", fill="#3399ff") + xlab("") + ylab("Correlation") + labs(title="Impact of attributes on males' decision")
 ```
 
 ```{r}
 # Correlation barplot for females
-corrf <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(corfatr, corfsin, corfint, corffun, corfamb, corfint))
+corrf <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(corfatr, corfsin, corfint, corffun, corfamb, corfshar))
 ggplot(corrf, aes(attributes, correlation)) + geom_bar(stat="identity", fill="#ff99cc") + xlab("") + ylab("Correlation") + labs(title="Impact of attributes on females' decision")
 ```
 
