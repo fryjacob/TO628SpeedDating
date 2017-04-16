@@ -1,6 +1,6 @@
 ---
 title: "Speed Dating Project"
-author: "Jake Fry"
+author: "Jake Fry, Amy Maloche, Delphine Ruaro, Shireen Zhou, Justin Mao"
 date: "April 13, 2017"
 output: html_document
 ---
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 speed <- read.csv("Speed Dating Data.csv")
 speed$gender <- as.factor(speed$gender)
-speed$match <- as.factor(speed$match)
+#speed$match <- as.factor(speed$match)
 speed$field_cd <- as.factor(speed$field_cd)
 levels(speed$field_cd) <- c("Law","Math","SocScie/Psych", "MedSci", "Engineering", "English", "History", "Business", "Education", "Bio","SocialWork","Undergrad", "PoliSci", "Film","FineArts","Lang","Architecture","Other")
 speed$race <- as.factor(speed$race)
@@ -26,7 +26,7 @@ speed$go_out <- as.factor(speed$go_out)
 levels(speed$go_out) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
 speed$group <- ifelse(speed$career_c == 2, 1, ifelse(speed$career_c == 7, 2, 3))
 speed$group <- as.factor(speed$group)
-levels(speed$group) <- c("Academic/Research", "Business", "Other")
+levels(speed$group) <- c("Academic/Research", "Banking/Consulting", "Other")
 
 speed$career_c <-as.factor(speed$career_c)
 levels(speed$career_c) <- c("Lawyer","Academic/Research","Psychologist","DocMed", "Engineer", "Entertainment", "Banking/Consulting", "RealEstate","IntlAffairs","Undecided","SocialWork","SpeechPath","Politics", "ProSports", "Other", "Journalism", "Architecture")
@@ -95,6 +95,33 @@ sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
 
 ```
 
+## Data Exploration
+
+### Dating Within Career Groups
+Through examination of the dataset, it became apparent that participants could be grouped into three categories based on their career aspirations: Academic/Research, Banking/Consulting, and Other
+```{r echo=FALSE }
+par(mar=c(10,4,4,2))
+plot(speed$career_c, las=2, col = "darkblue", main = "Distribution of Participants by Career")
+```
+
+We wanted to understand whether participants were more or less likely to find a match with someone within these three groups.  Overall, participants in the speed dating event achieved a `r round(sum(sd2$match)/length(sd2$match)*100, 1)`% match rate.  When broken into groups, the following match rates are observed:
+```{r echo=FALSE}
+gr1 <- subset(sd2, sd2$group == "Academic/Research")
+gr2 <- subset(sd2, sd2$group == "Banking/Consulting")
+gr3 <- subset(sd2, sd2$group == "Other")
+
+result_base <- round(sum(sd2$match)/length(sd2$match)*100, 1) 
+result_gr1 <-  round(sum(gr1$match)/length(gr1$match)*100, 1)
+result_gr2 <- round(sum(gr2$match)/length(gr2$match)*100, 1)
+result_gr3 <- round(sum(gr3$match)/length(gr3$match)*100, 1)
+
+par(mar=c(10,4,4,2))
+barplot(c(result_base, result_gr1, result_gr2, result_gr3), col = "darkblue", names.arg = c("Baseline", "Academic/Research", "Banking/Consulting", "Other"), las=2, ylim=c(0,20), ylab = "% Likelihood of Match", main = "Likelihood of Match by Group")
+```
+
+From these results, we see that members of the Banking/Consulting group are slightly more likely to date within the group than any other.  One could speculate that this tendency is based on other similarities in ambition and intelligence, or that given the high tempo of these professions, that individuals in those roles understand the demands placed on their time and are more likely to tolerate those demands in a relationship.
+
+
 ## Logit Model
 
 
@@ -104,11 +131,12 @@ sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
 
 ```
 
-## KNN Model
+## Random Forest Model
 
 ```{r}
 
 
 ```
+
 
 
