@@ -40,7 +40,8 @@ sd2 <- speed[ , c(
     "iid", 
     "gender", 
     "pid", 
-    "match", 
+    "match",
+    "dec",
     "int_corr", 
     "samerace", 
     "age_o", 
@@ -130,18 +131,41 @@ top_subset <- subset(sdclean,sdclean$top == T)
 top_subset <- top_subset[!duplicated(top_subset$iid), ]
 ```
 
+
 ## Demographic
 ```{r}
-top_race <- top_subset %>% group_by(gender, race) %>% summarise(Count = n())
-ggplot(top_race, aes(x=factor(gender), y=Count, fill=factor(race))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Top100 of Paired Partners") + labs(x="Gender",y="Number")+theme(plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+top_race2 <- top_subset %>% group_by(gender, race) %>% summarise(Count = n())
+total_race2 <- sdclean %>% group_by(gender, race) %>% summarise(Total = n())
+top_race2$percent <- top_race2$Count/total_race2$Total
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(1000 * x, format = format, digits = digits, ...), "‰")
+}
+top_race2$percent <- percent(top_race2$percent)
+
+ggplot(top_race2, aes(x=factor(gender), y=percent, fill=factor(race))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Top100 with Most Pairs") + labs(x="Gender",y="Per Mile")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+
+
+top_race <- top_subset %>% group_by(race) %>% summarise(Count = n())
+total_race <- sdclean %>% group_by(race) %>% summarise(Total = n())
+top_race$percent <- top_race$Count/total_race$Total
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(1000 * x, format = format, digits = digits, ...), "‰")
+}
+top_race$percent <- percent(top_race$percent)
+
+ggplot(top_race, aes(x=factor(race), y=percent)) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Top100 with Most Pairs") + labs(x="Race",y="Per Mile")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 ```
 
 ## Field
 ```{r}
 top_field <- top_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
+
 ggplot(top_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 of Paired Partners") +theme(plot.title = element_text(size=20, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 with Most Pairs") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
@@ -149,23 +173,27 @@ ggplot(top_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) +
 ```{r}
 top_group <- top_subset %>% group_by(gender, group) %>% summarise(Count = n())
 ggplot(top_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 of Paired Partners") +theme(plot.title = element_text(size=20, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 with Most Pairs") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
 ## Age
 ```{r}
-top_age <- top_subset %>% group_by(gender, age) %>% summarise(Count = n())
-ggplot(top_age, aes(x=factor(gender), y=Count, fill=factor(age))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 of Paired Partners") +theme(plot.title = element_text(size=20, face="bold", 
+top_subset$range <- ifelse(top_subset$age < 21, "20 or less",
+                     ifelse(top_subset$age < 26 & top_subset$age > 20, "21-25",
+                            ifelse(top_subset$age < 31 & top_subset$age > 25, "25-30", 
+                                   ifelse(top_subset$age < 36 & top_subset$age > 30, "31-35", "more than 35"))))
+top_age <- top_subset %>% group_by(gender, range) %>% summarise(Count = n())
+ggplot(top_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 with Most Pairs") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
 # People more likely to say yes
 ```{r}
 
-yes_freq <- aggregate(match ~ iid, function(x) sum(duplicated(x)), data=sdclean)
-top_yes <- yes_freq[with(yes_freq, order(-yes_freq$match)),][1:100,]
+yes_freq <- aggregate(dec ~ iid, function(x) sum(duplicated(x)), data=sdclean)
+top_yes <- yes_freq[with(yes_freq, order(-yes_freq$dec)),][1:100,]
 
 for (i in 1:nrow(sdclean)) {
      if (sdclean$iid[i] %in% top_yes$iid)
@@ -184,15 +212,23 @@ yes_subset <- yes_subset[!duplicated(yes_subset$iid), ]
 ## Demographic
 ```{r}
 yes_race <- yes_subset %>% group_by(gender, race) %>% summarise(Count = n())
-ggplot(yes_race, aes(x=factor(gender), y=Count, fill=factor(race))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Top100 of Successful Matches") + labs(x="Gender",y="Number")+theme(plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+total_race <- sdclean %>% group_by(gender, race) %>% summarise(Total = n())
+yes_race$percent <- yes_race$Count/total_race$Total
+
+percent <- function(x, digits = 2, format = "f", ...) {
+  paste0(formatC(1000 * x, format = format, digits = digits, ...), "‰")
+}
+yes_race$percent <- percent(yes_race$percent)
+
+ggplot(yes_race, aes(x=factor(gender), y=percent, fill=factor(race))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Top100 of Yes Decision") + labs(x="Gender",y="Number") + theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 ```
 
 ## Field
 ```{r}
 yes_field <- yes_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
 ggplot(yes_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 of Successful Matches") +theme(plot.title = element_text(size=20, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 of Yes Decision") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
@@ -200,14 +236,18 @@ ggplot(yes_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) +
 ```{r}
 yes_group <- yes_subset %>% group_by(gender, group) %>% summarise(Count = n())
 ggplot(yes_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 of Successful Matches") +theme(plot.title = element_text(size=20, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 of Yes Decision") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
 ## Age
 ```{r}
-yes_age <- yes_subset %>% group_by(gender, age) %>% summarise(Count = n())
-ggplot(yes_age, aes(x=factor(gender), y=Count, fill=factor(age))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 of Successful Matches") +theme(plot.title = element_text(size=20, face="bold", 
+yes_subset$range <- ifelse(yes_subset$age < 21, "20 or less",
+                     ifelse(yes_subset$age < 26 & yes_subset$age > 20, "21-25",
+                            ifelse(yes_subset$age < 31 & yes_subset$age > 25, "25-30", 
+                                   ifelse(yes_subset$age < 36 & yes_subset$age > 30, "31-35", "more than 35"))))
+yes_age <- yes_subset %>% group_by(gender, range) %>% summarise(Count = n())
+ggplot(yes_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 of Yes Decision") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
