@@ -1,0 +1,251 @@
+---
+title: "Project2"
+author: "Shireen Zhou"
+date: "4/13/2017"
+output: 
+  html_document: 
+    highlight: tango
+    toc: yes
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Cleaning
+```{r datacleaning}
+
+speed <- read.csv("Speed Dating Data.csv")
+speed$gender <- as.factor(speed$gender)
+#speed$match <- as.factor(speed$match)
+speed$field_cd <- as.factor(speed$field_cd)
+levels(speed$field_cd) <- c("Law","Math","SocScie/Psych", "MedSci", "Engineering", "English", "History", "Business", "Education", "Bio","SocialWork","Undergrad", "PoliSci", "Film","FineArts","Lang","Architecture","Other")
+speed$race <- as.factor(speed$race)
+speed$date <- as.factor(speed$date)
+levels(speed$date) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$go_out <- as.factor(speed$go_out)
+levels(speed$go_out) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$group <- ifelse(speed$career_c == 2, 1, ifelse(speed$career_c == 7, 2, 3))
+speed$group <- as.factor(speed$group)
+levels(speed$group) <- c("Academic/Research", "Banking/Consulting", "Other")
+
+speed$career_c <-as.factor(speed$career_c)
+levels(speed$career_c) <- c("Lawyer","Academic/Research","Psychologist","DocMed", "Engineer", "Entertainment", "Banking/Consulting", "RealEstate","IntlAffairs","Undecided","SocialWork","SpeechPath","Politics", "ProSports", "Other", "Journalism", "Architecture")
+speed$race_o <-as.factor(speed$race_o) 
+speed$samerace <- as.factor(speed$samerace)
+
+
+sd2 <- speed[ , c(
+    "iid", 
+    "gender", 
+    "pid", 
+    "match",
+    "dec",
+    "int_corr", 
+    "samerace", 
+    "age_o", 
+    "race_o",
+    "dec_o",
+    "age", 
+    "field_cd", 
+    "race", 
+    "imprace", 
+    "imprelig", 
+    "date", 
+    "go_out",
+    "sports",
+    "tvsports",
+    "exercise",
+    "dining",
+    "museums",
+    "art",
+    "hiking",
+    "gaming",
+    "clubbing",
+    "reading",
+    "tv",
+    "theater",
+    "movies",
+    "concerts",
+    "music",
+    "shopping",
+    "yoga",
+    "attr1_1",
+    "sinc1_1",
+    "intel1_1",
+    "fun1_1",
+    "amb1_1",
+    "shar1_1",
+    "attr2_1",
+    "sinc2_1",
+    "intel2_1",
+    "fun2_1",
+    "amb2_1",
+    "shar2_1",
+    "group",
+    "wave")]
+
+waveNum <- which(colnames(sd2)=="wave")
+sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
+
+sd2 <- sd2[, -45] #Remove wave numbers
+
+sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the data is organized by participant
+
+sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
+
+sdclean$gender <- factor(x=sdclean$gender, levels = c(0,1), labels = c("Female","Male"))
+sdclean$race <-factor(x=sdclean$race, levels = c(1,2,3,4,5,6), labels = c("Black/African American","European/Caucasian-American","Latino/Hispanic American","Asian/Pacific Islander/Asian-American","Native American","Other"))
+sdclean$race_o <- factor(x=sdclean$race_o, levels =c(1,2,3,4,5,6), labels = c("Black/African American","European/Caucasian-American","Latino/Hispanic American","Asian/Pacific Islander/Asian-American","Native American","Other"))
+```
+
+# People with the most matches
+```{r}
+library(ggplot2)
+library (magrittr)
+library(dplyr)
+library(scales)
+
+match_freq <- aggregate(match ~ pid, function(x) sum(duplicated(x)), data=sdclean)
+top_match <- match_freq[with(match_freq, order(-match_freq$match)),][1:100,]
+
+for (i in 1:nrow(sdclean)) {
+     if (sdclean$iid[i] %in% top_match$pid)
+       {
+         sdclean$top[i] <- T
+     }
+     else {sdclean$top[i] <- F}
+ }
+
+top_subset <- subset(sdclean,sdclean$top == T)
+
+# Remove duplicated information of same person
+top_subset <- top_subset[!duplicated(top_subset$iid), ]
+```
+
+## Demographic
+```{r}
+BA <- subset(sdclean,sdclean$race == "Black/African American")
+BAiid <- length(unique(BA$iid))
+BAmatch <- nrow(BA[BA$match == "1",])
+BApercent <- percent(BAiid/BAmatch)
+
+EC <- subset(sdclean,sdclean$race == "European/Caucasian-American")
+ECiid <- length(unique(EC$iid))
+ECmatch <- nrow(EC[EC$match == "1",])
+ECpercent <- percent(ECiid/ECmatch)
+
+LH <- subset(sdclean,sdclean$race == "Latino/Hispanic American")
+LHiid <- length(unique(LH$iid))
+LHmatch <- nrow(LH[LH$match == "1",])
+LHpercent <- percent(LHiid/LHmatch)
+
+AP <- subset(sdclean,sdclean$race == "Asian/Pacific Islander/Asian-American")
+APiid <- length(unique(AP$iid))
+APmatch <- nrow(AP[AP$match == "1",])
+APpercent <- percent(APiid/APmatch)
+
+O <- subset(sdclean,sdclean$race == "Other")
+Oiid <- length(unique(O$iid))
+Omatch <- nrow(O[O$match == "1",])
+Opercent <- percent(Oiid/Omatch)
+
+race <- data.frame("Race" = c("Black/African","European/Caucasian","Latino/Hispanic","Asian/Pacific Islander/Asian","Other"), "MatchRate" = c(BApercent,ECpercent,LHpercent,APpercent,Opercent))
+  
+ggplot(race, aes(x=factor(Race), y= MatchRate )) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Most Matches") + labs(x="Race",y="Match Rate%")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+```
+
+## Field
+```{r}
+top_field <- top_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
+
+ggplot(top_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 with Most Matches") +theme(plot.title = element_text(size=15, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
+```
+
+## Career Group
+```{r}
+top_group <- top_subset %>% group_by(gender, group) %>% summarise(Count = n())
+ggplot(top_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 with Most Matches") +theme(plot.title = element_text(size=15, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
+```
+
+## Age
+```{r}
+top_subset$range <- ifelse(top_subset$age < 21, "20 or less",
+                     ifelse(top_subset$age < 26 & top_subset$age > 20, "21-25",
+                            ifelse(top_subset$age < 31 & top_subset$age > 25, "25-30", 
+                                   ifelse(top_subset$age < 36 & top_subset$age > 30, "31-35", "more than 35"))))
+top_age <- top_subset %>% group_by(gender, range) %>% summarise(Count = n())
+ggplot(top_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 with Most Matches") +theme(plot.title = element_text(size=15, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
+```
+
+# People more likely to say yes
+```{r}
+
+yes_freq <- aggregate(dec ~ iid, function(x) sum(duplicated(x)), data=sdclean)
+top_yes <- yes_freq[with(yes_freq, order(-yes_freq$dec)),][1:100,]
+
+for (i in 1:nrow(sdclean)) {
+     if (sdclean$iid[i] %in% top_yes$iid)
+       {
+         sdclean$yes[i] <- T
+     }
+     else {sdclean$yes[i] <- F}
+ }
+
+yes_subset <- subset(sdclean,sdclean$yes == T)
+
+# Remove duplicated information of same person
+yes_subset <- yes_subset[!duplicated(yes_subset$iid), ]
+```
+
+
+## Demographic
+```{r}
+BAyes <- percent(BAiid/nrow(BA[BA$dec == "1",]))
+ECyes <- percent(ECiid/nrow(EC[EC$dec == "1",]))
+LHyes <- percent(LHiid/nrow(LH[LH$dec == "1",]))
+APyes <- percent(APiid/nrow(AP[AP$dec == "1",]))
+Oyes <- percent(Oiid/nrow(O[O$dec == "1",]))
+
+yes <- data.frame("Race" = c("Black/African","European/Caucasian","Latino/Hispanic","Asian/Pacific Islander/Asian","Other"), "YesRate" = c(BAyes,ECyes,LHyes,APyes,Oyes))
+  
+ggplot(yes, aes(x=factor(Race), y= YesRate )) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Most Yes Decisions") + labs(x="Race",y="Chance to say yes")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+
+```
+
+## Field
+```{r}
+yes_field <- yes_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
+ggplot(yes_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 of Yes Decision") +theme(plot.title = element_text(size=15, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
+```
+
+## Career Group
+```{r}
+yes_group <- yes_subset %>% group_by(gender, group) %>% summarise(Count = n())
+ggplot(yes_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 of Yes Decision") +theme(plot.title = element_text(size=15, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
+```
+
+## Age
+```{r}
+yes_subset$range <- ifelse(yes_subset$age < 21, "20 or less",
+                     ifelse(yes_subset$age < 26 & yes_subset$age > 20, "21-25",
+                            ifelse(yes_subset$age < 31 & yes_subset$age > 25, "25-30", 
+                                   ifelse(yes_subset$age < 36 & yes_subset$age > 30, "31-35", "more than 35"))))
+yes_age <- yes_subset %>% group_by(gender, range) %>% summarise(Count = n())
+ggplot(yes_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 of Yes Decision3") +theme(plot.title = element_text(size=15, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
+```

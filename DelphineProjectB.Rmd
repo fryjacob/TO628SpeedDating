@@ -1,0 +1,515 @@
+---
+title: "Project B - Attributes and impact of time"
+author: "Delphine Ruaro"
+date: "13 avril 2017"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Project B: Speed Dating
+
+```{r}
+speed <- read.csv("Speed Dating Data.csv")
+speed$gender <- as.factor(speed$gender)
+speed$match <- as.factor(speed$match)
+speed$field_cd <- as.factor(speed$field_cd)
+levels(speed$field_cd) <- c("Law","Math","SocScie/Psych", "MedSci", "Engineering", "English", "History", "Business", "Education", "Bio","SocialWork","Undergrad", "PoliSci", "Film","FineArts","Lang","Architecture","Other")
+speed$race <- as.factor(speed$race)
+speed$date <- as.factor(speed$date)
+levels(speed$date) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$go_out <- as.factor(speed$go_out)
+levels(speed$go_out) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$career_c <-as.factor(speed$career_c)
+levels(speed$career_c) <- c("Lawyer","Academic/Research","Psychologist","DocMed", "Engineer", "Entertainment", "Banking/Consulting", "RealEstate","IntlAffairs","Undecided","SocialWork","SpeechPath","Politics", "ProSports", "Other", "Journalism", "Architecture")
+speed$race_o <-as.factor(speed$race_o) 
+speed$samerace <- as.factor(speed$samerace)
+
+sd2 <- speed[ , c(
+    "iid", 
+    "gender", 
+    "pid", 
+    "match", 
+    "dec",
+    "int_corr", 
+    "samerace", 
+    "age_o", 
+    "race_o",
+    "dec_o",
+    "age", 
+    "field_cd", 
+    "race", 
+    "imprace", 
+    "imprelig", 
+    "date", 
+    "go_out",
+    "sports",
+    "tvsports",
+    "exercise",
+    "dining",
+    "museums",
+    "art",
+    "hiking",
+    "gaming",
+    "clubbing",
+    "reading",
+    "tv",
+    "theater",
+    "movies",
+    "concerts",
+    "music",
+    "shopping",
+    "yoga",
+    "attr1_1",
+    "sinc1_1",
+    "intel1_1",
+    "fun1_1",
+    "amb1_1",
+    "shar1_1",
+    "attr2_1",
+    "sinc2_1",
+    "intel2_1",
+    "fun2_1",
+    "amb2_1",
+    "shar2_1",
+    "wave",
+    "attr",
+    "sinc",
+    "intel",
+    "fun",
+    "amb",
+    "shar")]
+
+waveNum <- which(colnames(sd2)=="wave")
+sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
+
+#sd2 <- sd2[, -45]
+sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the data is organized by participant
+
+sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
+
+interestTable <- unique(data.frame(sdclean$iid))
+interestTable$iid <- interestTable$sdclean.iid
+interestTable$sdclean.iid <- NULL
+
+for (x in interestTable$iid) {
+  interestTable$go_out[interestTable$iid == x] <- sdclean$go_out[x == sdclean$iid]
+  interestTable$age[interestTable$iid == x] <- sdclean$age[x == sdclean$iid]
+  interestTable$field_cd[interestTable$iid == x] <- sdclean$field_cd[x == sdclean$iid]
+  interestTable$date[interestTable$iid == x] <- sdclean$date[x == sdclean$iid]
+  interestTable$sports[interestTable$iid == x] <- sdclean$sports[x == sdclean$iid]
+  interestTable$tvsports[interestTable$iid == x] <- sdclean$tvsports[x == sdclean$iid]
+  interestTable$exercise[interestTable$iid == x] <- sdclean$exercise[x == sdclean$iid]
+  interestTable$dining[interestTable$iid == x] <- sdclean$dining[x == sdclean$iid]
+  interestTable$museums[interestTable$iid == x] <- sdclean$museums[x == sdclean$iid]
+  interestTable$art[interestTable$iid == x] <- sdclean$art[x == sdclean$iid]
+  interestTable$hiking[interestTable$iid == x] <- sdclean$hiking[x == sdclean$iid]
+  interestTable$gaming[interestTable$iid == x] <- sdclean$gaming[x == sdclean$iid]
+  interestTable$clubbing[interestTable$iid == x] <- sdclean$clubbing[x == sdclean$iid]
+  interestTable$reading[interestTable$iid == x] <- sdclean$reading[x == sdclean$iid]
+  interestTable$tv[interestTable$iid == x] <- sdclean$tv[x == sdclean$iid]
+  interestTable$theater[interestTable$iid == x] <- sdclean$theater[x == sdclean$iid]
+  interestTable$movies[interestTable$iid == x] <- sdclean$movies[x == sdclean$iid]
+  interestTable$concerts[interestTable$iid == x] <- sdclean$concerts[x == sdclean$iid]
+  interestTable$music[interestTable$iid == x] <- sdclean$music[x == sdclean$iid]
+  interestTable$shopping[interestTable$iid == x] <- sdclean$shopping[x == sdclean$iid]
+  interestTable$yoga[interestTable$iid == x] <- sdclean$yoga[x == sdclean$iid]
+}
+
+
+```
+
+```{r}
+#Add column to check if total of attributions add up to 100
+
+sdclean$total1 <- rowSums(sdclean[,c("attr1_1", "sinc1_1", "intel1_1", "fun1_1", "amb1_1", "shar1_1")])
+sdclean$attr1_1 <- round(sdclean$attr1_1/sdclean$total1*100, digits = 2)
+sdclean$sinc1_1 <- round(sdclean$sinc1_1/sdclean$total1*100, digits = 2)
+sdclean$intel1_1 <- round(sdclean$intel1_1/sdclean$total1*100, digits = 2)
+sdclean$fun1_1 <- round(sdclean$fun1_1/sdclean$total1*100, digits = 2)
+sdclean$amb1_1 <- round(sdclean$amb1_1/sdclean$total1*100, digits = 2)
+sdclean$shar1_1 <- round(sdclean$shar1_1/sdclean$total1*100, digits = 2)
+
+sdclean$total1 <- round(rowSums(sdclean[,c("attr1_1", "sinc1_1", "intel1_1", "fun1_1", "amb1_1", "shar1_1")]),0)
+
+```
+
+
+### What do people look for in the other sex?
+
+Here, we want to have a sense of what men and women say they look for in the opposite sex. Using the attributes, we will compare what they say they look for. 
+
+```{r, what ppl look for, echo = FALSE}
+# Ref JPHwang on Kaggle for radarchart code
+library(fmsb)
+library(dplyr)
+library(ggplot2)
+test1 <-
+sdclean %>%
+  group_by(gender) %>%
+  summarise(Attractive = mean(attr1_1), Sincere = mean(sinc1_1), Intelligent = mean(intel1_1), Fun = mean(fun1_1), Ambitious = mean(amb1_1), Interest = mean(shar1_1))
+
+statedplot <-
+test1 %>% 
+  select(-gender)
+ 
+maxmin <- data.frame(
+ Attractive = c(36, 0),
+ Sincere = c(36, 0),
+ Intelligent = c(36, 0),
+ Fun = c(36, 0),
+ Ambitious = c(36, 0),
+ Interest = c(36, 0))
+
+test11 <- rbind(maxmin, statedplot)
+
+test11male <- test11[c(1,2,4),]
+test11female <- test11[c(1,2,3),]
+
+radarchart(test11,
+           pty = 32,
+           axistype = 0,
+           pcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("cadetblue2", 0.5)),
+           pfcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("cadetblue2", 0.5)),
+           plty = 1,
+           plwd = 3,
+           cglty = 1,
+           cglcol = "gray88",
+           centerzero = TRUE,
+           seg = 5,
+           vlcex = 0.75,
+           palcex = 0.75,
+           title="What people say they look for in the opposite sex")
+
+legend("topleft", 
+       c("Male", "Female"),
+       fill = c(adjustcolor("cadetblue2", 0.5), adjustcolor("hotpink1", 0.5)))
+```
+
+> We can see that men and women look for different attributes. Men seem to value attractiveness more than women do. On the other side, women seem to value sincerity and ambition more than men do. 
+> **Recommendation:** This implies that a predictive model should take gender into account, as the importance of attributes differ across genders.
+
+
+### Which attributes actually matter
+
+We will now try and understand which attributes *actuall* mattered in people's decision. To do that, we will use the attributes rating of people and the final decision. We will then look at the correlation between each attribute and the decision, on average and then by gender.   
+
+```{r, Data organization, include = FALSE}
+# Group by pid: mean for that person, and sex opposite - the sex who
+test2 <-
+sdclean %>%
+  group_by(pid, gender) %>%
+  summarise(Decision = mean(dec), Attractive = mean(attr), Sincere = mean(sinc), Intelligent = mean(intel), Fun = mean(fun), Ambitious = mean(amb), Interest = mean(shar))
+
+test2a <- test2 
+test2 %>% 
+  select(pid, gender, Decision, Attractive) 
+
+test2b <-
+test2 %>% 
+  select(pid, gender, Decision, Sincere) 
+
+test2c <-
+test2 %>% 
+  select(pid, gender, Decision, Intelligent)
+
+test2d <-
+test2 %>% 
+  select(pid, gender, Decision, Fun) 
+
+test2e <-
+test2 %>% 
+  select(pid, gender, Decision, Ambitious)
+
+test2f <-
+test2 %>% 
+  select(pid, gender, Decision, Interest) 
+
+coratr <- cor(test2a$Decision, test2a$Attractive)
+corsin <- cor(test2b$Decision, test2b$Sincere)
+corint <- cor(test2c$Decision, test2c$Intelligent)
+corfun <- cor(test2d$Decision, test2d$Fun)
+coramb <- cor(test2e$Decision, test2e$Ambitious)
+corshar <- cor(test2f$Decision, test2f$Interest)
+
+test2am <-
+test2 %>% 
+  select(pid, gender, Decision, Attractive) %>% 
+  filter(!Attractive == "NA") %>% 
+  filter(gender == "1")
+
+test2af <-
+test2 %>% 
+  select(pid, gender, Decision, Attractive) %>% 
+  filter(!Attractive == "NA") %>% 
+  filter(gender == "0")
+
+cormatr <- cor(test2am$Decision, test2am$Attractive)
+corfatr <- cor(test2af$Decision, test2af$Attractive)
+
+test2bm <-
+test2 %>% 
+  select(pid, gender, Decision, Sincere) %>% 
+  filter(gender == "1")
+
+test2bf <-
+test2 %>% 
+  select(pid, gender, Decision, Sincere) %>% 
+  filter(!Sincere == "NA") %>% 
+  filter(gender == "0")
+  
+cormsin <- cor(test2bm$Decision, test2bm$Sincere)
+corfsin <- cor(test2bf$Decision, test2bf$Sincere)
+
+test2cm <-
+test2 %>% 
+  select(pid, gender, Decision, Intelligent) %>% 
+  filter(!Intelligent == "NA") %>% 
+  filter(gender == "1")
+
+test2cf <-
+test2 %>% 
+  select(pid, gender, Decision, Intelligent) %>% 
+  filter(!Intelligent == "NA") %>% 
+  filter(gender == "0")
+
+cormint <- cor(test2cm$Decision, test2cm$Intelligent)
+corfint <- cor(test2cf$Decision, test2cf$Intelligent)
+
+test2dm <-
+test2 %>% 
+  select(pid, gender, Decision, Fun) %>% 
+  filter(!Fun == "NA") %>% 
+  filter(gender == "1")
+
+test2df <-
+test2 %>% 
+  select(pid, gender, Decision, Fun) %>% 
+  filter(!Fun == "NA") %>% 
+  filter(gender == "0")
+
+cormfun <- cor(test2dm$Decision, test2dm$Fun)
+corffun <- cor(test2df$Decision, test2df$Fun)
+
+test2em <-
+test2 %>% 
+  select(pid, gender, Decision, Ambitious) %>% 
+  filter(!Ambitious == "NA") %>% 
+  filter(gender == "1")
+
+test2ef <-
+test2 %>% 
+  select(pid, gender, Decision, Ambitious) %>% 
+  filter(!Ambitious == "NA") %>% 
+  filter(gender == "0")
+
+cormamb <- cor(test2em$Decision, test2em$Ambitious)
+corfamb <- cor(test2ef$Decision, test2ef$Ambitious)
+
+test2fm <-
+test2 %>% 
+  select(pid, gender, Decision, Interest) %>% 
+  filter(!Interest == "NA") %>% 
+  filter(gender == "1")
+
+test2ff <-
+test2 %>% 
+  select(pid, gender, Decision, Interest) %>% 
+  filter(!Interest == "NA") %>% 
+  filter(gender == "0")
+
+cormshar <- cor(test2fm$Decision, test2fm$Interest)
+corfshar <- cor(test2ff$Decision, test2ff$Interest)
+
+```
+
+
+```{r}
+# Correlation barplot for average
+library(ggplot2)
+corravg <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(coratr, corsin, corint, corfun, coramb, corshar))
+ggplot(corravg, aes(attributes, correlation)) + geom_bar(stat="identity") + xlab("") + ylab("Correlation") + labs(title="Impact of attributes on decision (average)")
+```
+
+```{r}
+# Correlation barplot for males
+corrm <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(cormatr, cormsin, cormint, cormfun, cormamb, cormshar))
+ggplot(corrm, aes(attributes, correlation)) + geom_bar(stat="identity", fill="#3399ff") + xlab("") + ylab("Correlation") + labs(title="Impact of attributes on males' decision")
+```
+
+```{r}
+# Correlation barplot for females
+corrf <- data.frame(attributes = c("Attractive", "Sincere", "Intelligent", "Fun", "Ambitious", "Interests"), correlation=c(corfatr, corfsin, corfint, corffun, corfamb, corfshar))
+ggplot(corrf, aes(attributes, correlation)) + geom_bar(stat="identity", fill="#ff99cc") + xlab("") + ylab("Correlation") + labs(title="Impact of attributes on females' decision")
+```
+
+> We find that attractiveness and fun are the main attributes by far (~ 0.78 and 0.67 respectively versus ~ 0.3 for the rest of attributes). When looking at the gender difference, we can see that men value ambition more than women, but value sincerity less than they do. Women look for fun in their partner more than men do.  
+
+
+### What do people say they want vs What they actually want
+
+To visualize our latest findings more clearly, we will now compare what men and women said they were looking for in a partner versus what they actually care about. 
+
+```{r, data organization n, include = FALSE}
+# Ref JPHwang on Kaggle for radarchart code
+fin <-data.frame(Traits = c("Average", "Male", "Female"),
+                          corAttractive = c(coratr, cormatr, corfatr),
+                          corSincere = c(corsin, cormsin, corfsin),
+                          corIntelligence = c(corint, cormint, corfint),
+                          corFun = c(corfun, cormfun, corffun),
+                          corAmbitious = c(coramb, cormamb, corfamb),
+                          corInterest = c(corshar, cormshar, corfshar))
+
+fin$total <- rowSums(fin[,c("corAttractive", "corSincere", "corIntelligence", "corFun", "corAmbitious", "corInterest")])
+
+fin$corAttractive <- round(fin$corAttractive/fin$total*100, digits = 2)
+fin$corSincere <- round(fin$corSincere/fin$total*100, digits = 2)
+fin$corIntelligence <- round(fin$corIntelligence/fin$total*100, digits = 2)
+fin$corFun <- round(fin$corFun/fin$total*100, digits = 2)
+fin$corAmbitious <- round(fin$corAmbitious/fin$total*100, digits = 2)
+fin$corInterest <- round(fin$corInterest/fin$total*100, digits = 2)
+
+fin <-
+fin %>%
+  select(corAttractive, corSincere, corIntelligence, corFun, corAmbitious, corInterest)
+
+colnames(fin) <- c("Attractive","Sincere", "Intelligent", "Fun", "Ambitious", "Interest")
+
+
+
+testn <- rbind(maxmin, fin, statedplot)
+
+testnmale <- testn[-c(3, 5, 6), ]
+testnfemale <- testn[-c(3, 4, 7), ]
+
+radarchart(testnmale,
+           pty = 32,
+           axistype = 0,
+           pcol = c(adjustcolor("chartreuse1", 0.5), adjustcolor("cadetblue2", 0.5)),
+           pfcol = c(adjustcolor("chartreuse1", 0.5), adjustcolor("cadetblue2", 0.5)),
+           plty = 1,
+           plwd = 3,
+           cglty = 1,
+           cglcol = "gray88",
+           centerzero = TRUE,
+           seg = 5,
+           vlcex = 0.75,
+           palcex = 0.75,
+           title = "Males' Stated Interest versus Actual Influence on Decision")
+
+legend("topleft",
+       c("Stated Interest", "Actual Influence"),
+       fill = c(adjustcolor("cadetblue2", 0.5), adjustcolor("chartreuse1", 0.5)))
+
+radarchart(testnfemale,
+           pty = 32,
+           axistype = 0,
+           pcol = c(adjustcolor("darkorchid1", 0.5), adjustcolor("hotpink1", 0.5)),
+           pfcol = c(adjustcolor("darkorchid1", 0.5), adjustcolor("hotpink1", 0.5)),
+           plty = 1,
+           plwd = 3,
+           cglty = 1,
+           cglcol = "gray88",
+           centerzero = TRUE,
+           seg = 5,
+           vlcex = 0.75,
+           palcex = 0.75,
+           title = "Females' Stated Interest versus Actual Influence on Decision")
+
+legend("topleft",
+       c("Stated Interest", "Actual Influence"),
+       fill = c(adjustcolor("hotpink1", 0.5), adjustcolor("darkorchid1", 0.5)))
+```
+
+> We can now clearly see that people's stated interest versus their actual preferences highly differs. **Recommendation:** this suggests that the matching algorithm should not take users' stated preferences so much into account, but rather use historical data on the attributes of individuals this user decided to go on a date with (in the case of Tinder, "swiped right"). As an additional recommendation, we could argue that asking users the attributes they look for in a partner is useless, and can be avoided in order to make the signup process easier. This would, indeed, increase the conversion rate and reduce abandons on the platform. 
+
+> When looking at genders specifically, we can see that men value ambition and shared interests in women more than they say they do. On the other hand, intelligence did not influence their decision that much. Women value attractiveness, fun and shared interests much more than they say they do. As for men, intelligence and sincerity did not influence their decision that much. 
+> **Recommendation:** It seems like intelligence does not influence people's decision that much. We would therefore suggest not ask any academic-related question in the signup process. In order to increase people's chances of being asked on a date, we would also suggest **helping them in the signup process**. Indicating what the other sex looks for in a partner could indeed help them filling their profile and choosing their profile picture accordingly. For example, men could be thinking a serious profile would give them more chances, while data shows women prefer fun in a man. 
+
+
+## What people think the opposite sex wants vs what the opposite wants:
+
+```{r, what ppl look for, echo = FALSE}
+test3 <-
+sdclean %>%
+  group_by(gender) %>%
+  summarise(Attractive = mean(attr2_1), Sincere = mean(sinc2_1), Intelligent = mean(intel2_1), Fun = mean(fun2_1), Ambitious = mean(amb2_1), Interest = mean(shar2_1))
+
+test3plot <-
+test3 %>%
+  select(-gender)
+
+test4 <- rbind(maxmin, test3plot, fin)
+
+test4male <- test4[c(1,2,3,6),]
+test4female <- test4[c(1,2,4,7),]
+
+radarchart(test4male,
+           pty = 32,
+           axistype = 0,
+           pcol = c(adjustcolor("cadetblue2", 0.5), adjustcolor("chartreuse1", 0.5)),
+           pfcol = c(adjustcolor("cadetblue2", 0.5), adjustcolor("chartreuse1", 0.5)),
+           plty = 1,
+           plwd = 3,
+           cglty = 1,
+           cglcol = "gray88",
+           centerzero = TRUE,
+           seg = 5,
+           vlcex = 0.75,
+           palcex = 0.75,
+           title="What women think men look for versus what men actually do")
+
+legend("topleft",
+       c("Women Estimated Influence", "Actual Influence"),
+       fill = c(adjustcolor("cadetblue2", 0.5), adjustcolor("chartreuse1", 0.5)))
+
+radarchart(test4female,
+           pty = 32,
+           axistype = 0,
+           pcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("darkorchid1", 0.5)),
+           pfcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("darkorchid1", 0.5)),
+           plty = 1,
+           plwd = 3,
+           cglty = 1,
+           cglcol = "gray88",
+           centerzero = TRUE,
+           seg = 5,
+           vlcex = 0.75,
+           palcex = 0.75,
+           title="What men think women look for versus what women actually do")
+
+legend("topleft",
+       c("Men Estimated Influence", "Actual Influence"),
+       fill = c(adjustcolor("hotpink1", 0.5), adjustcolor("darkorchid1", 0.5)))
+```
+
+
+
+
+## Impact of number of previous dates
+
+We will now analyze the impact of the number of dates on people's decision. To do that, we will look at the ratio of positive decision after first dates compared to after the last dates (usually, the 10th date in this dataset).
+
+```{r}
+sdclean2 <- na.omit(sd2)
+sdclean2 <- within(sdclean2, iidbef <- c(NA, head(sdclean2$iid, -1)))
+sdclean2$firstdate <- ifelse(sdclean2$iid != sdclean2$iidbef,1,0)
+sdclean2[1,55] <- 1
+sdclean2$iidaft <- c(sdclean2$iid[-1], NA)
+sdclean2$enddate <- ifelse(sdclean2$iid != sdclean2$iidaft,1,0)
+sdclean2[5504,57] <- 1
+
+firstdate <- sdclean2[which(sdclean2$firstdate==1),]
+enddate <- sdclean2 [which(sdclean2$enddate==1),]
+
+firstyes <- nrow(firstdate[which(firstdate$dec==1),])/nrow(firstdate)
+endyes <- nrow(enddate[which(enddate$dec==1),])/nrow(enddate)
+
+# Barplot
+timeyes <- data.frame(time = c("First Date", "Last Date"), yesratio=c(firstyes, endyes))
+ggplot(timeyes, aes(time, yesratio, fill=time)) + geom_bar(stat="identity") + xlab("") + ylab("Ratio of Positive Decision") + labs(title="Impact of number of dates on decision") + guides(fill=FALSE) + scale_fill_manual(values=c("#CC6666", "#9999CC"))
+
+```
+
+> After multiple dates, people are more difficult, and said "yes" to less people. This means that the number of previous dates impacts the likelihood of matching. **Recommandation:** we would suggest to increase the required accuracy of the model for people that have been on multiple dates already. If someone has been on multiple dates through the app already, the suggested profiles for that person should match his/her "perfect partner" even more. This implies that the app should track which matches converted into dates.  
