@@ -84,7 +84,7 @@ sd2 <- speed[ , c(
 waveNum <- which(colnames(sd2)=="wave")
 sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
 
-sd2 <- sd2[, -45]
+#sd2 <- sd2[, -45]
 sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the data is organized by participant
 
 sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
@@ -428,60 +428,61 @@ legend("topleft",
 > **Recommendation:** It seems like intelligence does not influence people's decision that much. We would therefore suggest not ask any academic-related question in the signup process. In order to increase people's chances of being asked on a date, we would also suggest **helping them in the signup process**. Indicating what the other sex looks for in a partner could indeed help them filling their profile and choosing their profile picture accordingly. For example, men could be thinking a serious profile would give them more chances, while data shows women prefer fun in a man. 
 
 
-<!-- ## What people think the opposite sex wants vs what the opposite wants: CANNOT COMPUTE CAUSE NO AMB2-1 ANYMORE?? -->
-<!-- ```{r, what ppl look for, echo = FALSE} -->
-<!-- test3 <- -->
-<!-- sdclean %>% -->
-<!--   group_by(gender) %>% -->
-<!--   summarise(Attractive = mean(attr2_1), Sincere = mean(sinc2_1), Intelligent = mean(intel2_1), Fun = mean(fun2_1), Ambitious = mean(amb2_1), Interest = mean(shar2_1)) -->
+## What people think the opposite sex wants vs what the opposite wants:
 
-<!-- test3plot <- -->
-<!-- test3 %>%  -->
-<!--   select(-gender) -->
+```{r, what ppl look for, echo = FALSE}
+test3 <-
+sdclean %>%
+  group_by(gender) %>%
+  summarise(Attractive = mean(attr2_1), Sincere = mean(sinc2_1), Intelligent = mean(intel2_1), Fun = mean(fun2_1), Ambitious = mean(amb2_1), Interest = mean(shar2_1))
 
-<!-- test4 <- rbind(maxmin, test3plot, fin) -->
+test3plot <-
+test3 %>%
+  select(-gender)
 
-<!-- test4male <- test4[c(1,2,3,6),] -->
-<!-- test4female <- test4[c(1,2,4,7),] -->
+test4 <- rbind(maxmin, test3plot, fin)
 
-<!-- radarchart(test4male, -->
-<!--            pty = 32, -->
-<!--            axistype = 0, -->
-<!--            pcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("cadetblue2", 0.5)), -->
-<!--            pfcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("cadetblue2", 0.5)), -->
-<!--            plty = 1, -->
-<!--            plwd = 3, -->
-<!--            cglty = 1, -->
-<!--            cglcol = "gray88", -->
-<!--            centerzero = TRUE, -->
-<!--            seg = 5, -->
-<!--            vlcex = 0.75, -->
-<!--            palcex = 0.75, -->
-<!--            title="What women think men look for versus what men actually do") -->
+test4male <- test4[c(1,2,3,6),]
+test4female <- test4[c(1,2,4,7),]
 
-<!-- legend("topleft",  -->
-<!--        c("Women Estimated Influence", "Actual Influence"), -->
-<!--        fill = c(adjustcolor("cadetblue2", 0.5), adjustcolor("hotpink1", 0.5))) -->
+radarchart(test4male,
+           pty = 32,
+           axistype = 0,
+           pcol = c(adjustcolor("cadetblue2", 0.5), adjustcolor("chartreuse1", 0.5)),
+           pfcol = c(adjustcolor("cadetblue2", 0.5), adjustcolor("chartreuse1", 0.5)),
+           plty = 1,
+           plwd = 3,
+           cglty = 1,
+           cglcol = "gray88",
+           centerzero = TRUE,
+           seg = 5,
+           vlcex = 0.75,
+           palcex = 0.75,
+           title="What women think men look for versus what men actually do")
 
-<!-- radarchart(test4female, -->
-<!--            pty = 32, -->
-<!--            axistype = 0, -->
-<!--            pcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("cadetblue2", 0.5)), -->
-<!--            pfcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("cadetblue2", 0.5)), -->
-<!--            plty = 1, -->
-<!--            plwd = 3, -->
-<!--            cglty = 1, -->
-<!--            cglcol = "gray88", -->
-<!--            centerzero = TRUE, -->
-<!--            seg = 5, -->
-<!--            vlcex = 0.75, -->
-<!--            palcex = 0.75, -->
-<!--            title="What men think women look for versus what women actually do") -->
+legend("topleft",
+       c("Women Estimated Influence", "Actual Influence"),
+       fill = c(adjustcolor("cadetblue2", 0.5), adjustcolor("chartreuse1", 0.5)))
 
-<!-- legend("topleft",  -->
-<!--        c("Men Estimated Influence", "Actual Influence"), -->
-<!--        fill = c(adjustcolor("cadetblue2", 0.5), adjustcolor("hotpink1", 0.5))) -->
-<!-- ``` -->
+radarchart(test4female,
+           pty = 32,
+           axistype = 0,
+           pcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("darkorchid1", 0.5)),
+           pfcol = c(adjustcolor("hotpink1", 0.5), adjustcolor("darkorchid1", 0.5)),
+           plty = 1,
+           plwd = 3,
+           cglty = 1,
+           cglcol = "gray88",
+           centerzero = TRUE,
+           seg = 5,
+           vlcex = 0.75,
+           palcex = 0.75,
+           title="What men think women look for versus what women actually do")
+
+legend("topleft",
+       c("Men Estimated Influence", "Actual Influence"),
+       fill = c(adjustcolor("hotpink1", 0.5), adjustcolor("darkorchid1", 0.5)))
+```
 
 
 
