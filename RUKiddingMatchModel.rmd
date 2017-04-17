@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ##We chose to look at the deltas between someone and their partners interest instead of just the persons interests to get more information about potential matches.
 ###To do this, after initial cleaning and filling in of NA values, we matched pid & interests to the iid for each corresponding row.
 
-```{r,  echo = FALSE, warning=FALSE}
+```{r,  echo = FALSE, warning=FALSE, message = FALSE}
 suppressWarnings(library(randomForest))
 suppressWarnings(library(class))
 suppressWarnings(library(lmtest))
