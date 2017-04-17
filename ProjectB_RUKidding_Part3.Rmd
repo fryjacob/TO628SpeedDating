@@ -530,4 +530,4 @@ ggplot(timeyes, aes(time, yesratio, fill=time)) + geom_bar(stat="identity") + xl
 
 ```
 
-> After multiple dates, people were more difficult, and said "yes" to less people. This means that the number of previous dates impacts the likelihood of matching. **Recommandation:** we would suggest to increase the required accuracy of the model for people that have been on multiple dates already. If someone has been on multiple dates through the app already, the suggested profiles for that person should match his/her "perfect partner" even more. This implies that the app should track which matches converted into dates.  
+> After multiple dates, people were more difficult, and said "yes" to less people. This means that the number of previous dates impacts the likelihood of matching. **Recommendation:** we would suggest to increase the required accuracy of the model for people that have been on multiple dates already. If someone has been on multiple dates through the app already, the suggested profiles for that person should match his/her "perfect partner" even more. This implies that the app should track which matches converted into dates.  

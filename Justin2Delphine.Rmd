@@ -85,7 +85,6 @@ sdclean_int_comparison$percentage[1] <- sdclean_int_comparison$Count[1]/(sdclean
 sdclean_int_comparison$percentage[2] <- sdclean_int_comparison$Count[2]/(sdclean_int_comparison$Count[2]+sdclean_int_comparison$Count[4])
 sdclean_int_comparison$percentage[3] <- 1-sdclean_int_comparison$percentage[1]
 sdclean_int_comparison$percentage[4] <- 1-sdclean_int_comparison$percentage[2]
-sdclea
 View(sdclean_int_comparison)
 ggplot(sdclean_int_comparison, aes(x=factor(int_comparison), y=percentage, fill=factor(match))) + 
     geom_bar(stat="identity") + theme_bw() + ggtitle("Match Distribution") +theme(plot.title = element_text(size=20, face="bold", 
