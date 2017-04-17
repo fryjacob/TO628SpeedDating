@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Data Cleaning
-```{r datacleaning}
+```{r datacleaning,echo=FALSE}
 
 speed <- read.csv("Speed Dating Data.csv")
 speed$gender <- as.factor(speed$gender)
@@ -101,7 +101,7 @@ sdclean$race_o <- factor(x=sdclean$race_o, levels =c(1,2,3,4,5,6), labels = c("B
 ```
 
 # People with the most matches
-```{r}
+```{r, echo=FALSE}
 library(ggplot2)
 library (magrittr)
 library(dplyr)
@@ -125,7 +125,7 @@ top_subset <- top_subset[!duplicated(top_subset$iid), ]
 ```
 
 ## Demographic
-```{r}
+```{r,echo=FALSE}
 BA <- subset(sdclean,sdclean$race == "Black/African American")
 BAiid <- length(unique(BA$iid))
 BAmatch <- nrow(BA[BA$match == "1",])
@@ -154,40 +154,44 @@ Opercent <- percent(Oiid/Omatch)
 race <- data.frame("Race" = c("Black/African","European/Caucasian","Latino/Hispanic","Asian/Pacific Islander/Asian","Other"), "MatchRate" = c(BApercent,ECpercent,LHpercent,APpercent,Opercent))
   
 ggplot(race, aes(x=factor(Race), y= MatchRate )) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Most Matches") + labs(x="Race",y="Match Rate%")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic - Match Rate") + labs(x="Race",y="Match Rate%")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 ```
+> Asian/Pacific Islander/Asian-American has a match rate of around 52%, followed by European/Caucasian American with a rate of 38%. Those high match rate groups would be our target market.
 
 ## Field
-```{r}
+```{r, echo=FALSE}
 top_field <- top_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
 
 ggplot(top_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 with Most Matches") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+> Among the top 100 people with the most matches, female has a more diverse distribution of career fields, while male's distribution slightly centralizes in Engineering, Business and Science.
 
 ## Career Group
-```{r}
+```{r, echo=FALSE}
 top_group <- top_subset %>% group_by(gender, group) %>% summarise(Count = n())
 ggplot(top_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 with Most Matches") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+> Genrally speaking, among the top 100 people with the most matches, more males are in Academic Research and Banking Consulting than other industries, which trend is opposite for females.
 
 ## Age
-```{r}
+```{r, echo=FALSE}
 top_subset$range <- ifelse(top_subset$age < 21, "20 or less",
                      ifelse(top_subset$age < 26 & top_subset$age > 20, "21-25",
                             ifelse(top_subset$age < 31 & top_subset$age > 25, "25-30", 
                                    ifelse(top_subset$age < 36 & top_subset$age > 30, "31-35", "more than 35"))))
 top_age <- top_subset %>% group_by(gender, range) %>% summarise(Count = n())
 ggplot(top_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 with Most Matches") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+> Among the top 100 people with the most matches, both females and males mostly are in the 20s, although males have a larger median.
 
 # People more likely to say yes
-```{r}
+```{r, echo=FALSE}
 
 yes_freq <- aggregate(dec ~ iid, function(x) sum(duplicated(x)), data=sdclean)
 top_yes <- yes_freq[with(yes_freq, order(-yes_freq$dec)),][1:100,]
@@ -208,7 +212,7 @@ yes_subset <- yes_subset[!duplicated(yes_subset$iid), ]
 
 
 ## Demographic
-```{r}
+```{r, echo=FALSE}
 BAyes <- percent(BAiid/nrow(BA[BA$dec == "1",]))
 ECyes <- percent(ECiid/nrow(EC[EC$dec == "1",]))
 LHyes <- percent(LHiid/nrow(LH[LH$dec == "1",]))
@@ -218,34 +222,38 @@ Oyes <- percent(Oiid/nrow(O[O$dec == "1",]))
 yes <- data.frame("Race" = c("Black/African","European/Caucasian","Latino/Hispanic","Asian/Pacific Islander/Asian","Other"), "YesRate" = c(BAyes,ECyes,LHyes,APyes,Oyes))
   
 ggplot(yes, aes(x=factor(Race), y= YesRate )) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic of Most Yes Decisions") + labs(x="Race",y="Chance to say yes")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic - Chance to say yes") + labs(x="Race",y="Chance to say yes")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 
 ```
+> Decision rates varies less in terms of demographics. European/Caucasian Americans and Latino/Hispanic Americans have the greatest chance to say yes.
 
 ## Field
-```{r}
+```{r,echo=FALSE}
 yes_field <- yes_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
 ggplot(yes_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Field of Top100 of Yes Decision") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+> Career field distribution of top 100 people with most yes decisions are mostly the same as top people with most matches. That is, female has a more diverse distribution of career fields, while male's distribution slightly centralizes in Engineering, Business and Science.
 
 ## Career Group
-```{r}
+```{r,echo=FALSE}
 yes_group <- yes_subset %>% group_by(gender, group) %>% summarise(Count = n())
 ggplot(yes_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group of Top100 of Yes Decision") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+> General career group distribution is similar between popular people and people likely to say yes. However, males who are likely to say yes tend to spread more evenly in 3 areas, while most popular males are more centralized in Banking and Consulting.
 
 ## Age
-```{r}
+```{r,echo=FALSE}
 yes_subset$range <- ifelse(yes_subset$age < 21, "20 or less",
                      ifelse(yes_subset$age < 26 & yes_subset$age > 20, "21-25",
                             ifelse(yes_subset$age < 31 & yes_subset$age > 25, "25-30", 
                                    ifelse(yes_subset$age < 36 & yes_subset$age > 30, "31-35", "more than 35"))))
 yes_age <- yes_subset %>% group_by(gender, range) %>% summarise(Count = n())
 ggplot(yes_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Age of Top100 of Yes Decision3") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+> Age distribution is also similar between popular people and people likely to say yes, although top males of yes decisions has people more than 35, which does not happen for popular males.
