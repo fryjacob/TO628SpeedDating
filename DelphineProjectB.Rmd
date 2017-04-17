@@ -495,10 +495,10 @@ We will now analyze the impact of the number of dates on people's decision. To d
 sdclean2 <- na.omit(sd2)
 sdclean2 <- within(sdclean2, iidbef <- c(NA, head(sdclean2$iid, -1)))
 sdclean2$firstdate <- ifelse(sdclean2$iid != sdclean2$iidbef,1,0)
-sdclean2[1,54] <- 1
+sdclean2[1,55] <- 1
 sdclean2$iidaft <- c(sdclean2$iid[-1], NA)
 sdclean2$enddate <- ifelse(sdclean2$iid != sdclean2$iidaft,1,0)
-sdclean2[5504,56] <- 1
+sdclean2[5504,57] <- 1
 
 firstdate <- sdclean2[which(sdclean2$firstdate==1),]
 enddate <- sdclean2 [which(sdclean2$enddate==1),]
