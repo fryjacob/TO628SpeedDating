@@ -1,0 +1,292 @@
+---
+title: "ProjectB - R U Kidding? - Match probability amongst similar individuals"
+author: "Team 9: R U Kidding? Amy Maloche, Jake Fry, Shireen Zhou, Justin Mao, Delphine Ruaro"
+date: "4/13/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
+```
+
+> In this project, the R U Kidding? team is working for OKMatch.com, an online dating website. Using data from a Speed Dating event, our job is to find a way to match people that are likely to like each other.
+
+> We believe that there are three key ways to improving matching:
+1 - Targeting the right type of person, to increase the probability of matches [Part1.Rmd and Part2.Rmd]
+2 - Improving the signup process, to increase the conversion rate and quality of profiles, which will in the end increase the probability of matches [Part3.Rmd]
+3 - Building a predicting model to match users [Part4.Rmd]
+
+
+```{r Clean the data}
+## Data cleaning
+speed <- read.csv("Speed Dating Data.csv")
+
+speed$condtn <- as.factor(speed$condtn)
+speed$gender <- as.factor(speed$gender)
+speed$match <- as.factor(speed$match)
+speed$field_cd <- as.factor(speed$field_cd)
+levels(speed$field_cd) <- c("Law","Math","SocScie/Psych", "MedSci", "Engineering", "English", "History", "Business", "Education", "Bio","SocialWork","Undergrad", "PoliSci", "Film","FineArts","Lang","Architecture","Other")
+speed$race <- as.factor(speed$race)
+speed$goal <- as.factor(speed$goal)
+levels(speed$goal) <- c("FunNightOut", "MeetNewPpl", "GetADate","SRSRelationship", "ToSayIDidIt","Other")
+speed$date <- as.factor(speed$date)
+levels(speed$date) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$go_out <- as.factor(speed$go_out)
+levels(speed$go_out) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$group <- ifelse(speed$career_c == 2, 1, ifelse(speed$career_c == 7, 2, 3))
+speed$group <- as.factor(speed$group)
+levels(speed$group) <- c("Academic/Research", "Banking/Consulting", "Other")
+speed$career_c <-as.factor(speed$career_c)
+levels(speed$career_c) <- c("Lawyer","Academic/Research","Psychologist","DocMed", "Engineer", "Entertainment", "Banking/Consulting", "RealEstate","IntlAffairs","Undecided","SocialWork","SpeechPath","Politics", "ProSports", "Other", "Journalism", "Architecture")
+speed$race_o <-as.factor(speed$race_o) 
+speed$dec_o <- as.factor(speed$dec_o)
+speed$samerace <- as.factor(speed$samerace)
+
+sd2 <- speed
+sd2 <- sd2[ , -1] #IID  
+sd2 <- sd2[, -1] #ID  
+sd2 <- sd2[, -2] #IDG
+sd2 <- sd2[, -3] #Wave
+sd2 <- sd2[, -3] #Round
+sd2 <- sd2[, -3] #Position
+sd2 <- sd2[, -3] #Postion1
+sd2 <- sd2[, -4] #Partner 
+sd2 <- sd2[, -4] #PID
+sd2 <- sd2[, -26]#Field
+sd2 <- sd2[, -(27:29)]#Academics
+sd2 <- sd2[,-(30:32)]#Socioeconomic 
+sd2 <- sd2[,-33]#Career
+sd2 <- sd2[,-(59:64)]#What others look for
+sd2 <- sd2[,-(70:74)]#Others perception
+sd2 <- sd2[,-(81:92)]#Data gathered after intitial
+sd2 <- sd2[,(1:79)]
+sd2 <- sd2[,-(70:79)] #Removes Post First Date
+sd2 <- sd2[,-52]#exclude expnum
+
+sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the data is organized by participant
+sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
+
+
+
+
+library(ggplot2)
+library(class)
+library(gmodels)
+library(zoo)
+library(lmtest)
+library(car)
+library(dplyr)
+library(kernlab)
+library(neuralnet)
+library(caret)
+
+
+sdclean$gender <- factor(x=sdclean$gender, levels = c(0,1), labels = c("Female","Male"))
+sdclean$race <-factor(x=sdclean$race, levels = c(1,2,3,4,5,6), labels = c("Black/African American","European/Caucasian-American","Latino/Hispanic American","Asian/Pacific Islander/Asian-American","Native American","Other"))
+sdclean$race_o <- factor(x=sdclean$race_o, levels =c(1,2,3,4,5,6), labels = c("Black/African American","European/Caucasian-American","Latino/Hispanic American","Asian/Pacific Islander/Asian-American","Native American","Other"))
+
+```
+
+## Data exploration
+
+We will start by exploring the dataset. 
+
+```{r GGplot for race}
+sdclean_new <- sdclean %>% group_by(gender, race) %>% summarise(Count = n())
+#View(sdclean_new)
+ggplot(sdclean_new, aes(x=factor(gender), y=Count, fill=factor(race))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic Distribution") + labs(x="Gender",y="Number")+theme(plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+```
+
+> Breaking down the participants by race, we can see that the dataset is not very homogeneous, and that most of the individuals where European/Caucasian-American or Asian/Pacific Islander/Asian-American. 
+
+```{r GGplot for career}
+sdclean_career <- sdclean %>% group_by(gender, career_c) %>% summarise(Count = n())
+#View(sdclean_career)
+ggplot(sdclean_career, aes(x=factor(gender), y=Count, fill=factor(career_c))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Occupation Distribution") +theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
+```
+
+> Conclusion:  About 1/3 of female want to work in academic/research fields and alomost half of the males want to work in banking/consulting, followed by academic/research. The over-representation of those two fields might influence the datasets and matching, as those two groups might behave very differently than the rest. 
+
+
+## Matching probability amongst similar groups
+
+One common assumption is that people like people who are similar to them. We will first conduct some analysis to test if this assumption is true amongst different groups of people. 
+
+### Amongst people from the same race
+
+We will start by comparing the percentage of matches between people of the same race and people of different races. 
+
+```{r Question 6 Analysis in terms of race}
+sdclean$race_comparison <- ifelse(sdclean$race==sdclean$race_o,"1","0")
+sdclean_race_comparison <- sdclean %>% group_by(match, race_comparison) %>% summarise(Count = n())
+sdclean_race_comparison$match<- factor(x=sdclean_race_comparison$match, levels = c(0,1), labels = c("Not Match","Match"))
+sdclean_race_comparison$race_comparison<- factor(x=sdclean_race_comparison$race_comparison, levels = c(0,1), labels = c("Different Race","Same Race"))
+#View(sdclean_race_comparison)
+ggplot(sdclean_race_comparison, aes(x=factor(race_comparison), y=Count, fill=factor(match))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Number of matches amongst groups") +theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="", y="")+theme(legend.title=element_blank())
+```
+
+```{r}
+# Looking at percentages
+sdclean_race_comparison$percentage[1] <- sdclean_race_comparison$Count[1]/(sdclean_race_comparison$Count[3]+sdclean_race_comparison$Count[1])
+sdclean_race_comparison$percentage[2] <- sdclean_race_comparison$Count[2]/(sdclean_race_comparison$Count[2]+sdclean_race_comparison$Count[4])
+sdclean_race_comparison$percentage[3] <- 1-sdclean_race_comparison$percentage[1]
+sdclean_race_comparison$percentage[4] <- 1-sdclean_race_comparison$percentage[2]
+#View(sdclean_race_comparison)
+ggplot(sdclean_race_comparison, aes(x=factor(race_comparison), y=percentage, fill=factor(match))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Percentage of matches amongst groups") +theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="", y="")+theme(legend.title=element_blank())
+```
+
+> Conclusion: This chart doesn't show significant difference between match/not match percentage in both "different race" and "same race" category. Further analysis reaffirms that "match"percentage in "different race" and "same race" is 17.0% and 17.6%, respectively. Therefore, race might not be a significant variable to predict the match.
+
+```{r Question 6 Further Analysis}
+sdclean_race_imprace <- sdclean %>% group_by(match) %>% summarise(avg = mean(imprace))
+sdclean_race_imprace
+
+```
+
+> Conclusion: Given the scale (1-10) indicating the importance of dating with someone who has the same race, the average points of this scale for people end up match verus not match is 3.48 and 3.84, respectively, which means what people state what they want before the event is  different from what actually influences their decisions. In this case, race has little influence on thier date choices. 
+
+
+### Amongst people with shared interests
+
+We will now look at the matching probability amongst people that share the same interests (correlation of interests is > 0.5). 
+
+```{r}
+sdclean$int_comparison <- ifelse(sdclean$int_corr>0.5,1,0)
+sdclean_int_comparison <- sdclean %>% group_by(match, int_comparison) %>% summarise(Count = n())
+sdclean_int_comparison$match<- factor(x=sdclean_int_comparison$match, levels = c(0,1), labels = c("Not Match","Match"))
+sdclean_int_comparison$int_comparison<- factor(x=sdclean_int_comparison$int_comparison, levels = c(0,1), labels = c("Different Interests","Same Interests"))
+sdclean_int_comparison$percentage[1] <- sdclean_int_comparison$Count[1]/(sdclean_int_comparison$Count[3]+sdclean_int_comparison$Count[1])
+sdclean_int_comparison$percentage[2] <- sdclean_int_comparison$Count[2]/(sdclean_int_comparison$Count[2]+sdclean_int_comparison$Count[4])
+sdclean_int_comparison$percentage[3] <- 1-sdclean_int_comparison$percentage[1]
+sdclean_int_comparison$percentage[4] <- 1-sdclean_int_comparison$percentage[2]
+#View(sdclean_int_comparison)
+ggplot(sdclean_int_comparison, aes(x=factor(int_comparison), y=percentage, fill=factor(match))) + 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Match Distribution") +theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0))) +labs(x="", y="")+theme(legend.title=element_blank())
+```
+
+> We can see that dates with a higher correlation in interests had a higher probability of matching. This implies that people who share the same interests are more likely to match. This does not come as a surprise when knowing most of the data websites focus on shared interests. **Recommendation:** We would recommend OKMatch.com to therefore target individuals that share the same passion (rather than same demographics).
+
+### Amongst people with the same career aspirations
+
+Through examination of the dataset, it became apparent that participants could be grouped into three categories based on their career aspirations: Academic/Research, Banking/Consulting, and Other
+
+```{r datacleaning, echo= FALSE}
+
+speed <- read.csv("Speed Dating Data.csv")
+speed$gender <- as.factor(speed$gender)
+#speed$match <- as.factor(speed$match)
+speed$field_cd <- as.factor(speed$field_cd)
+levels(speed$field_cd) <- c("Law","Math","SocScie/Psych", "MedSci", "Engineering", "English", "History", "Business", "Education", "Bio","SocialWork","Undergrad", "PoliSci", "Film","FineArts","Lang","Architecture","Other")
+speed$race <- as.factor(speed$race)
+speed$date <- as.factor(speed$date)
+levels(speed$date) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$go_out <- as.factor(speed$go_out)
+levels(speed$go_out) <- c("SVRL/Week","2/Week","1/Week","2/Month", "1/Month", "SVRL/Year", "AlmostNever")
+speed$group <- ifelse(speed$career_c == 2, 1, ifelse(speed$career_c == 7, 2, 3))
+speed$group <- as.factor(speed$group)
+levels(speed$group) <- c("Academic/Research", "Banking/Consulting", "Other")
+
+speed$career_c <-as.factor(speed$career_c)
+levels(speed$career_c) <- c("Lawyer","Academic/Research","Psychologist","DocMed", "Engineer", "Entertainment", "Banking/Consulting", "RealEstate","IntlAffairs","Undecided","SocialWork","SpeechPath","Politics", "ProSports", "Other", "Journalism", "Architecture")
+speed$race_o <-as.factor(speed$race_o) 
+speed$samerace <- as.factor(speed$samerace)
+
+
+sd2 <- speed[ , c(
+    "iid", 
+    "gender", 
+    "pid", 
+    "match", 
+    "int_corr", 
+    "samerace", 
+    "age_o", 
+    "race_o",
+    "dec_o",
+    "age", 
+    "field_cd", 
+    "race", 
+    "imprace", 
+    "imprelig", 
+    "date", 
+    "go_out",
+    "sports",
+    "tvsports",
+    "exercise",
+    "dining",
+    "museums",
+    "art",
+    "hiking",
+    "gaming",
+    "clubbing",
+    "reading",
+    "tv",
+    "theater",
+    "movies",
+    "concerts",
+    "music",
+    "shopping",
+    "yoga",
+    "attr1_1",
+    "sinc1_1",
+    "intel1_1",
+    "fun1_1",
+    "amb1_1",
+    "shar1_1",
+    "attr2_1",
+    "sinc2_1",
+    "intel2_1",
+    "fun2_1",
+    "amb2_1",
+    "shar2_1",
+    "group",
+    "wave")]
+
+waveNum <- which(colnames(sd2)=="wave")
+sd2 <- subset(sd2, sd2[ , waveNum] > 9 | sd2[ , waveNum] < 6)
+
+sd2 <- sd2[, -45] #Remove wave numbers
+
+sdrandom <- sd2[sample(nrow(sd2), nrow(sd2)),] #Get a random sample since the data is organized by participant
+
+sdclean <- na.omit(sdrandom) #Remove rows with NA values to create a "clean" set
+
+
+```
+
+```{r echo=FALSE }
+par(mar=c(10,4,4,2))
+plot(speed$career_c, las=2, col = "darkblue", main = "Distribution of Participants by Career")
+```
+
+We wanted to understand whether participants were more or less likely to find a match with someone within these three groups.  Overall, participants in the speed dating event achieved a `r round(sum(sd2$match)/length(sd2$match)*100, 1)`% match rate.  When broken into groups, the following match rates are observed:
+
+```{r echo=FALSE}
+gr1 <- subset(sd2, sd2$group == "Academic/Research")
+gr2 <- subset(sd2, sd2$group == "Banking/Consulting")
+gr3 <- subset(sd2, sd2$group == "Other")
+
+result_base <- round(sum(sd2$match)/length(sd2$match)*100, 1) 
+result_gr1 <-  round(sum(gr1$match)/length(gr1$match)*100, 1)
+result_gr2 <- round(sum(gr2$match)/length(gr2$match)*100, 1)
+result_gr3 <- round(sum(gr3$match)/length(gr3$match)*100, 1)
+
+par(mar=c(10,4,4,2))
+barplot(c(result_base, result_gr1, result_gr2, result_gr3), col = "darkblue", names.arg = c("Baseline", "Academic/Research", "Banking/Consulting", "Other"), las=2, ylim=c(0,20), ylab = "% Likelihood of Match", main = "Likelihood of Match by Group")
+```
+
+> From these results, we see that members of the Banking/Consulting group are slightly more likely to date within the group than any other. One could speculate that this tendency is based on other similarities in ambition and intelligence, or that given the high tempo of these professions, that individuals in those roles understand the demands placed on their time and are more likely to tolerate those demands in a relationship. These findings support our previous recommendation of focusing on people that share the same passion. 
+
+### Conclusion
+
+> Overall, we can see that people sharing the same interests are more likely to match than people different people. Sharing the same ethnical group does not have any real impact. We can note that as all participants were students, we were not able to check for precise socio-economics attributes. We would therefore recommend the platform to focus on one specific passion: for example, be the N#1 dating platform for aspiring CEOS.  
+
+
+

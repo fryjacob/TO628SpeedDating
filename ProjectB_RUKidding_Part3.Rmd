@@ -4,6 +4,7 @@ author: "Team 9: R U Kidding? Amy Maloche, Jake Fry, Shireen Zhou, Justin Mao, D
 date: "13 avril 2017"
 output: html_document
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
 ```

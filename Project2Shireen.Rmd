@@ -156,6 +156,7 @@ race <- data.frame("Race" = c("Black/African","European/Caucasian","Latino/Hispa
 ggplot(race, aes(x=factor(Race), y= MatchRate )) + 
     geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic - Match Rate") + labs(x="Race",y="Match Rate%")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 ```
+
 > Asian/Pacific Islander/Asian-American has a match rate of around 52%, followed by European/Caucasian American with a rate of 38%. Those high match rate groups would be our target market.
 
 ## Field
@@ -166,6 +167,7 @@ ggplot(top_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) +
     geom_bar(stat="identity") + theme_bw() + ggtitle("Field - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+
 > Among the top 100 people with the most matches, female has a more diverse distribution of career fields, while male's distribution slightly centralizes in Engineering, Business and Science.
 
 ## Career Group
@@ -175,6 +177,7 @@ ggplot(top_group, aes(x=factor(gender), y=Count, fill=factor(group))) +
     geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+
 > Genrally speaking, among the top 100 people with the most matches, more males are in Academic Research and Banking Consulting than other industries, which trend is opposite for females.
 
 ## Age
@@ -188,6 +191,7 @@ ggplot(top_age, aes(x=factor(gender), y=Count, fill=factor(range))) +
     geom_bar(stat="identity") + theme_bw() + ggtitle("Age - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+
 > Among the top 100 people with the most matches, both females and males mostly are in the 20s, although males have a larger median.
 
 # People more likely to say yes
@@ -225,6 +229,7 @@ ggplot(yes, aes(x=factor(Race), y= YesRate )) +
     geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic - Chance to say yes") + labs(x="Race",y="Chance to say yes")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 
 ```
+
 > Decision rates varies less in terms of demographics. European/Caucasian Americans and Latino/Hispanic Americans have the greatest chance to say yes.
 
 ## Field
@@ -234,6 +239,7 @@ ggplot(yes_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) +
     geom_bar(stat="identity") + theme_bw() + ggtitle("Field - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+
 > Career field distribution of top 100 people with most yes decisions are mostly the same as top people with most matches. That is, female has a more diverse distribution of career fields, while male's distribution slightly centralizes in Engineering, Business and Science.
 
 ## Career Group
@@ -243,6 +249,7 @@ ggplot(yes_group, aes(x=factor(gender), y=Count, fill=factor(group))) +
     geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+
 > General career group distribution is similar between popular people and people likely to say yes. However, males who are likely to say yes tend to spread more evenly in 3 areas, while most popular males are more centralized in Banking and Consulting.
 
 ## Age
@@ -256,4 +263,5 @@ ggplot(yes_age, aes(x=factor(gender), y=Count, fill=factor(range))) +
     geom_bar(stat="identity") + theme_bw() + ggtitle("Age - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
+
 > Age distribution is also similar between popular people and people likely to say yes, although top males of yes decisions has people more than 35, which does not happen for popular males.

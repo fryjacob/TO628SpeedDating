@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
 ```
 
 > Now that we have a better understanding of the data and the variables that have an impact on matches (shared interests, specific attributes for men and women...), we will build a model to predict which partners would match. This model could be used to select the profiles that will be presented to a specific user, depending on his/her information. 
@@ -222,26 +222,10 @@ sdReduced$pDeltaShopping <- sdReduced$shopping - sdReduced$pShopping
 
 ## Logistic Regression
 
-```{r}
-logisticModel <- glm(match1 ~ ., data = trainData, family = "binomial")
-summary(logisticModel)
-logPrediction <- ifelse(predict(logisticModel, newdata=testData, type = "response") > .5, 1, 0)
-CrossTable(x = testData$match1, y = logPrediction, prop.chisq=FALSE)
-logisticModel2 <- glm(match1 ~ imprace + int_corr + samerace1 + field_cd11 + field_cd4 + intel2_1, data = trainData, family = "binomial")
-logPrediction2 <- ifelse(predict(logisticModel2, newdata=testData, type = "response") > .5, 1, 0)
-CrossTable(x = testData$match1, y = logPrediction2, prop.chisq=FALSE)
-
-```
-
-> The logistic summary tells us what is important to our model
-> The bad news is this model only predicted one match.  When we only included the results with significance, we did not predict any matches.  Overall this model will die a virgin.
-
-
-## First Model - Random Forest 
-
-Now we do a random forest, as we expect this to give the best results
+In order to confirm our previous observations, we run a logistic regression to understand which variables are important in predicting matches. 
 
 ```{r}
+
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
@@ -284,6 +268,33 @@ trainRows <- round(nrow(randomizedData) * .8)
 trainData <- randomizedData[1:trainRows, ]
 testData <- randomizedData[(trainRows+1):nrow(randomizedData), ]
 
+logisticModel <- glm(match1 ~ ., data = trainData, family = "binomial")
+summary(logisticModel)
+logPrediction <- ifelse(predict(logisticModel, newdata=testData, type = "response") > .5, 1, 0)
+CrossTable(x = testData$match1, y = logPrediction, prop.chisq=FALSE)
+logisticModel2 <- glm(match1 ~ imprace + int_corr + samerace1 + field_cd11 + field_cd4 + intel2_1, data = trainData, family = "binomial")
+logPrediction2 <- ifelse(predict(logisticModel2, newdata=testData, type = "response") > .5, 1, 0)
+CrossTable(x = testData$match1, y = logPrediction2, prop.chisq=FALSE)
+
+```
+
+> As identified earlier, we can see that correlation between interests has a statistically significant impact on predictions, as well as age and certain preferences in attributes. Race has a high coefficient, but this is probably because of the biased representation in the data. 
+
+> The bad news is that this model only predicted one match. When we only included the results with significance, we did not predict any matches. Overall, this model will die a virgin.
+
+
+```{r}
+prop.table(table(randomizedData$match1))
+```
+
+> We can see that the data only contains ~ 17% of matches. This is why our model does a very good job at predicting non-matches but has a hard time predicting matches.
+
+
+## First Model - Random Forest 
+
+We will now try and run a random forest. In order to correct for the unequal distribution of matches in the dataset, we will try and add costs to false negatives: individuals that we thought would not match but actually did in real life. 
+
+```{r}
 error_costRF <- matrix(c(NA,0,4,NA), nrow = 2)
 error_costRF
 
@@ -294,12 +305,13 @@ rfPredCosts <- predict(rfModelCosts, testData, type="response")
 CrossTable(testData$match1, rfPredCosts)
 ```
 
-> We tried many cost schemes, but ultimately they did not greatly effect the outcome 
+> We tried many cost schemes, but ultimately they did not greatly affect the outcome.
+> Overall, the model predicted 98.7% of the non-matches correctly, but only 6% of the matches. This means we would be missing a lot of opportunities to match individuals that would like each other. 
 
 
 ## Final Model - kNN
 
-Keeping k low due to the small number of positive matches
+We will now try running a kNN model. We will keep a low  k due to the small number of matches. 
 
 ```{r}
 knnPred <- knn(train = trainData, test = testData, cl = trainData$match1, k=5)
@@ -307,5 +319,16 @@ CrossTable(x = testData$match1, y = knnPred, prop.chisq=FALSE)
 
 ```
 
-> This KNN model is the best result we were generally able to achieve at 67-71% accuracy in predicting matches. (depending on randomized data run)
+> The kNN model performs much better. We were able to correctly predict 67-71% of matches (depending on randomized data run).
+> The model still does a better job at correctly predicting non-matches (99.8%). We are still missing opportunities of matching, but our predicted matches were correct 98.5% of the time. Overall, this means we will predict **less matches, but of higher quality**. 
+
+
+## Conclusion
+
+> Our model takes into account key variables, such as the correlation between interests, age, and attributes to predict whether two individuals will match. This model can be used to select the profiles who should be presented to an user depending on his/her information.
+
+> The current data set does not have enough matches to train our model perfectly. One solution could be to get more data and add information about matches, or create a subset with a better distribution. 
+
+> Overall, our model predicted 67% of the actual matches, and out of the matches it predicted, 98.5% of them were actual matches. **This means the model will give less matches, but of higher quality. This could actually be OKMatch.com's product differentiation.** Users will know that they would perhaps get less dates through the platform, but that the dates they will get will most likely lead them to a relationship. 
+
 
