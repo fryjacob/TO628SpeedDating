@@ -162,7 +162,7 @@ Opercent <- percent(Oiid/Omatch)
 race <- data.frame("Race" = c("Black/African","European/Caucasian","Latino/Hispanic","Asian/Pacific Islander/Asian","Other"), "MatchRate" = c(BApercent,ECpercent,LHpercent,APpercent,Opercent))
   
 ggplot(race, aes(x=factor(Race), y= MatchRate )) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic - Match Rate") + labs(x="Race",y="Match Rate%")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Match Rate amongst race groups") + labs(x="Race",y="Match Rate%")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 ```
 
 > Asians/Pacific Islanders/Asian-Americans seem to be the most attractive, with a match rate of around 52%, followed by European/Caucasian American with a rate of 38%. OKMatch.com should make sure to attract individuals from those race groups.
@@ -174,7 +174,7 @@ ggplot(race, aes(x=factor(Race), y= MatchRate )) +
 top_field <- top_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
 
 ggplot(top_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Field - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field distribution in Top100 most matched") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
@@ -185,7 +185,7 @@ ggplot(top_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) +
 ```{r}
 top_group <- top_subset %>% group_by(gender, group) %>% summarise(Count = n())
 ggplot(top_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Aspirational career distribution in Top100 most matched") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
@@ -200,7 +200,7 @@ top_subset$range <- ifelse(top_subset$age < 21, "20 or less",
                                    ifelse(top_subset$age < 36 & top_subset$age > 30, "31-35", "more than 35"))))
 top_age <- top_subset %>% group_by(gender, range) %>% summarise(Count = n())
 ggplot(top_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Age - Most Matches Top100") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age distribution in Top100 most matched") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
@@ -242,7 +242,7 @@ Oyes <- percent(Oiid/nrow(O[O$dec == "1",]))
 yes <- data.frame("Race" = c("Black/African","European/Caucasian","Latino/Hispanic","Asian/Pacific Islander/Asian","Other"), "YesRate" = c(BAyes,ECyes,LHyes,APyes,Oyes))
   
 ggplot(yes, aes(x=factor(Race), y= YesRate )) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Demographic - Chance to say yes") + labs(x="Race",y="Chance to say yes")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Positive decision rate amongst race groups") + labs(x="Race",y="Chance to say yes")+theme(plot.title = element_text(size=15, face="bold", margin = margin(10, 0, 10, 0)))+theme(legend.title=element_blank())
 
 ```
 
@@ -254,7 +254,7 @@ ggplot(yes, aes(x=factor(Race), y= YesRate )) +
 ```{r}
 yes_field <- yes_subset %>% group_by(gender, field_cd) %>% summarise(Count = n())
 ggplot(yes_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Field - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Field distribution in Top100 most likely to say yes") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
@@ -265,7 +265,7 @@ ggplot(yes_field, aes(x=factor(gender), y=Count, fill=factor(field_cd))) +
 ```{r}
 yes_group <- yes_subset %>% group_by(gender, group) %>% summarise(Count = n())
 ggplot(yes_group, aes(x=factor(gender), y=Count, fill=factor(group))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Career Group - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Aspirational career distribution in Top100 most likely to say yes") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
@@ -280,7 +280,7 @@ yes_subset$range <- ifelse(yes_subset$age < 21, "20 or less",
                                    ifelse(yes_subset$age < 36 & yes_subset$age > 30, "31-35", "more than 35"))))
 yes_age <- yes_subset %>% group_by(gender, range) %>% summarise(Count = n())
 ggplot(yes_age, aes(x=factor(gender), y=Count, fill=factor(range))) + 
-    geom_bar(stat="identity") + theme_bw() + ggtitle("Age - Yes Decision Top100") +theme(plot.title = element_text(size=15, face="bold", 
+    geom_bar(stat="identity") + theme_bw() + ggtitle("Age distribution in Top100 most likely to say yes") +theme(plot.title = element_text(size=15, face="bold", 
     margin = margin(10, 0, 10, 0))) +labs(x="Gender", y="Number")+theme(legend.title=element_blank())
 ```
 
